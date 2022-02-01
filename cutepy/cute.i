@@ -15,6 +15,7 @@
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* dout, int ndout)};
 %apply (int DIM1,double *IN_ARRAY1) {(int npos, double *pos),
                                      (int npix, double *fld),
+                                     (int npixs, double *flds),
                                      (int npix2, double *msk)};
 
 %inline %{
@@ -48,4 +49,27 @@ void cute_correlation_2D_wrap(int npos, double *pos,
 			     0., thmax, nth, na, 0,
 			     hf_th, hm_th);
 }
+
+void cute_line_correlation_wrap(int npixs, double *flds,
+				int npix2, double *msk,
+				double thmax, int nth, int nside,
+				int per_bin, double *dout, int ndout)
+{
+  double **fld;
+  int i, nfld=1;
+  double *hf_th = dout;
+  double *hm_th = &(dout[nth]);
+
+  if(per_bin)
+    nfld = nth;
+
+  fld = malloc(nfld*sizeof(double *));
+  for(i=0;i<nfld;i++)
+    fld[i] = &(flds[i*npix2]);
+
+  cute_line_correlation((long)nside, fld, msk,
+			0., thmax, nth, 0, hf_th,
+			hm_th, per_bin);
+  free(fld);
+ }
 %}

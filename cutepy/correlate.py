@@ -33,3 +33,62 @@ def correlate_scaled_2D(theta, phi, weight, scale,
     bins_x = np.linspace(0., x_max, nx+1)
     bins_a = np.linspace(0., 2*np.pi, na+1)
     return f, hm, bins_x, bins_a
+
+
+def _window_ell(ells, theta, smooth_kind):
+    if smooth_kind == 'TopHat':
+        win = np.ones_like(ells)
+        win[ells > np.pi/theta] = 0.
+    elif smooth_kind == 'Gaussian':
+        win = np.exp(-ells*(ells+1)*theta**2)
+    else:
+        raise ValueError(f"Unknown smoothing type {smooth_kind}")
+    return win
+
+
+def correlate_line(field, mask, theta_max_deg, n_theta,
+                   w_phase=True, scale='per_bin',
+                   smooth_kind='TopHat'):
+    # Compute alms
+    alm = hp.map2alm(field)
+
+    # Compute phase alms if needed
+    if w_phase:
+        abs_alm = np.abs(alm)
+        good = abs_alm > 0
+        alm[good] = alm[good] / abs_alm[good]
+
+    # Array of angles in radians
+    theta_max = np.radians(theta_max_deg)
+
+    # Back to map
+    npix = len(field)
+    nside = hp.npix2nside(npix)
+    ells = np.arange(3*nside)
+    if scale=='per_bin':
+        per_bin = 1
+        maps = np.zeros([n_theta, npix])
+        thetas = np.linspace(0, theta_max, n_theta+1)
+        # Mid-point
+        thetas = 0.5*(thetas[1:]+thetas[:-1])
+        for ith, th in enumerate(thetas):
+            fl = _window_ell(ells, th, smooth_kind)
+            print(ith, fl)
+            maps[ith] = hp.alm2map(hp.almxfl(alm, fl), nside)
+    else:
+        per_bin = 0
+        th = np.radians(scale)
+        fl = _window_ell(ells, th, smooth_kind)
+        maps = np.array([hp.alm2map(hp.almxfl(alm, fl), nside)])
+
+    # Compute histograms
+    res = lib.cute_line_correlation_wrap(maps.flatten(), mask,
+                                         theta_max, n_theta,
+                                         nside, per_bin, 2*n_theta)
+    hf, hm = res.reshape([2, n_theta])
+
+    # Combine into LCF
+    f = np.zeros_like(hf)
+    f[hm > 0] = hf[hm > 0] / hm[hm > 0]
+    bins = np.linspace(0., theta_max_deg, n_theta+1)
+    return f, hm, bins
