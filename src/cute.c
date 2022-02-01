@@ -604,7 +604,7 @@ void cute_line_correlation(long nside, double **fld, double *msk,
     if(do_log)
       n_logint=nx/log10(xmax/xmin);
 
-#pragma omp for
+#pragma omp for schedule(dynamic)
     for(i1=0;i1<npix;i1++) {
       if(msk[i1]<=0)
 	continue;
@@ -618,6 +618,8 @@ void cute_line_correlation(long nside, double **fld, double *msk,
 	int ax,ix,i3=listpix[j];
 	double *pos3=&(pos_pix[3*i3]);
 	double prod=0;
+	if(i3<=i1)
+	  continue;
 	if(msk[i3]<=0)
 	  continue;
 	for(ax=0;ax<3;ax++) {

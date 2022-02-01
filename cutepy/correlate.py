@@ -48,7 +48,7 @@ def _window_ell(ells, theta, smooth_kind):
 
 def correlate_line(field, mask, theta_max_deg, n_theta,
                    w_phase=True, scale='per_bin',
-                   smooth_kind='TopHat'):
+                   smooth_kind='TopHat', use_C=True):
     # Compute alms
     alm = hp.map2alm(field)
 
@@ -73,7 +73,6 @@ def correlate_line(field, mask, theta_max_deg, n_theta,
         thetas = 0.5*(thetas[1:]+thetas[:-1])
         for ith, th in enumerate(thetas):
             fl = _window_ell(ells, th, smooth_kind)
-            print(ith, fl)
             maps[ith] = hp.alm2map(hp.almxfl(alm, fl), nside)
     else:
         per_bin = 0
@@ -82,10 +81,43 @@ def correlate_line(field, mask, theta_max_deg, n_theta,
         maps = np.array([hp.alm2map(hp.almxfl(alm, fl), nside)])
 
     # Compute histograms
-    res = lib.cute_line_correlation_wrap(maps.flatten(), mask,
-                                         theta_max, n_theta,
-                                         nside, per_bin, 2*n_theta)
-    hf, hm = res.reshape([2, n_theta])
+    if use_C:
+        res = lib.cute_line_correlation_wrap(maps.flatten(), mask,
+                                             theta_max, n_theta,
+                                             nside, per_bin, 2*n_theta)
+        hf, hm = res.reshape([2, n_theta])
+    else:
+        vecs = np.array(hp.pix2vec(nside, np.arange(npix))).T
+        hf = np.zeros(n_theta)
+        hm = np.zeros(n_theta)
+        for i1 in range(npix):
+            if i1 % 100 == 0:
+                print(i1)
+            if mask[i1] <= 0:
+                continue
+            v1 = vecs[i1]
+            listpix = hp.query_disc(nside, v1, theta_max*2.2)
+            for i3 in listpix:
+                if i3 <= i1:
+                    continue
+                if mask[i3] <= 0:
+                    continue
+                v3 = vecs[i3]
+                v2 = 0.5*(v1+v3)
+                i2 = hp.vec2pix(nside, v2[0], v2[1], v2[2])
+                if mask[i2] <= 0:
+                    continue
+                cth = np.dot(v3,v1)
+                theta = np.arccos(cth)*0.5
+                i_theta = int(n_theta*theta/theta_max)
+                if i_theta >= n_theta:
+                    continue
+                if per_bin:
+                    mp = maps[i_theta]
+                else:
+                    mp = maps[0]
+                hf[i_theta] += mp[i1]*mp[i2]*mp[i3]
+                hm[i_theta] += 1
 
     # Combine into LCF
     f = np.zeros_like(hf)
