@@ -91,8 +91,6 @@ def correlate_line(field, mask, theta_max_deg, n_theta,
         hf = np.zeros(n_theta)
         hm = np.zeros(n_theta)
         for i1 in range(npix):
-            if i1 % 100 == 0:
-                print(i1)
             if mask[i1] <= 0:
                 continue
             v1 = vecs[i1]
