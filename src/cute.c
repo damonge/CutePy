@@ -636,7 +636,7 @@ void cute_line_correlation(long nside, double **fld, double *msk,
 	  else
 	    f=fld[0];
 	  hf_th_thr[ix]+=f[i1]*f[i2]*f[i3];
-	  hm_th_thr[ix]++;
+	  hm_th_thr[ix]+=msk[i1]*msk[i2]*msk[i3];
 	}
       }
     } //end omp for

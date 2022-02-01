@@ -115,7 +115,7 @@ def correlate_line(field, mask, theta_max_deg, n_theta,
                 else:
                     mp = maps[0]
                 hf[i_theta] += mp[i1]*mp[i2]*mp[i3]
-                hm[i_theta] += 1
+                hm[i_theta] += mask[i1]*mask[i2]*mask[i3]
 
     # Combine into LCF
     f = np.zeros_like(hf)
