@@ -8,8 +8,8 @@ def correlate_scaled(theta, phi, weight, scale,
     pos = (np.array([np.cos(theta), phi,
                      weight, scale]).T).flatten()
     nside = hp.npix2nside(len(field))
-    res = lib.cute_correlation_wrap(pos, field, mask,
-                                    x_max, nx, nside, 2*nx)
+    res = lib.cute_scaled_correlation_wrap(pos, field, mask,
+                                           x_max, nx, nside, 2*nx)
     hf, hm = res.reshape([2, nx])
     f = np.zeros_like(hf)
     f[hm > 0] = hf[hm > 0] / hm[hm > 0]
@@ -22,9 +22,9 @@ def correlate_scaled_2D(theta, phi, weight, scale,
     pos = (np.array([np.cos(theta), phi,
                      weight, scale]).T).flatten()
     nside = hp.npix2nside(len(field))
-    res = lib.cute_correlation_2D_wrap(pos, field, mask,
-                                       x_max, nx, na, nside,
-                                       2*nx*na)
+    res = lib.cute_scaled_correlation_2D_wrap(pos, field, mask,
+                                              x_max, nx, na, nside,
+                                              2*nx*na)
     hf, hm = res.reshape([2, nx*na])
     f = np.zeros_like(hf)
     f[hm > 0] = hf[hm > 0] / hm[hm > 0]
@@ -44,6 +44,59 @@ def _window_ell(ells, theta, smooth_kind):
     else:
         raise ValueError(f"Unknown smoothing type {smooth_kind}")
     return win
+
+
+def correlate_2pcf(field, mask, theta_max_deg, n_theta,
+                   scale=0., smooth_kind='TopHat', use_C=True):
+    # Array of angles in radians
+    theta_max = np.radians(theta_max_deg)
+
+    # Smooth map
+    npix = len(field)
+    nside = hp.npix2nside(npix)
+    ells = np.arange(3*nside)
+    if scale > 0:
+        th = np.radians(scale)
+        alm = hp.map2alm(field)
+        fl = _window_ell(ells, th, smooth_kind)
+        mp = hp.alm2map(hp.almxfl(alm, fl), nside)
+    else:
+        mp = field
+
+    # Compute histograms
+    if use_C:
+        res = lib.cute_correlation_wrap(mp, mask,
+                                        theta_max, n_theta,
+                                        nside, 2*n_theta)
+        hf, hm = res.reshape([2, n_theta])
+    else:
+        vecs = np.array(hp.pix2vec(nside, np.arange(npix))).T
+        hf = np.zeros(n_theta)
+        hm = np.zeros(n_theta)
+        for i1 in range(npix):
+            if mask[i1] <= 0:
+                continue
+            v1 = vecs[i1]
+            listpix = hp.query_disc(nside, v1, theta_max*1.2)
+            for i2 in listpix:
+                if i2 <= i1:
+                    continue
+                if mask[i2] <= 0:
+                    continue
+                v2 = vecs[i2]
+                cth = np.dot(v2,v1)
+                theta = np.arccos(cth)
+                i_theta = int(n_theta*theta/theta_max)
+                if i_theta >= n_theta:
+                    continue
+                hf[i_theta] += mp[i1]*mp[i2]
+                hm[i_theta] += mask[i1]*mask[i2]
+
+    # Combine into LCF
+    f = np.zeros_like(hf)
+    f[hm > 0] = hf[hm > 0] / hm[hm > 0]
+    bins = np.linspace(0., theta_max_deg, n_theta+1)
+    return f, hm, bins
 
 
 def correlate_line(field, mask, theta_max_deg, n_theta,

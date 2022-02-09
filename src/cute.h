@@ -25,4 +25,8 @@ void cute_correlation_scaled_2D(long ngal,double *pos,long nside,double *fld,dou
 void cute_line_correlation(long nside, double **fld, double *msk,
 			   double xmin, double xmax, int nx, int do_log,
 			   double *hf_th, double *hm_th, int per_bin);
+
+void cute_correlation(long nside, double *fld, double *msk,
+		      double xmin, double xmax, int nx, int do_log,
+		      double *hf_th, double *hm_th);
 #endif //_CUTE_

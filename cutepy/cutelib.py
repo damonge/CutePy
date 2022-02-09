@@ -71,13 +71,19 @@ def cute_correlation_scaled_2D(ngal, pos, nside, fld, msk, thmin, thmax, nth, na
 def cute_line_correlation(nside, fld, msk, xmin, xmax, nx, do_log, hf_th, hm_th, per_bin):
     return _cutelib.cute_line_correlation(nside, fld, msk, xmin, xmax, nx, do_log, hf_th, hm_th, per_bin)
 
-def cute_correlation_wrap(npos, npix, npix2, thmax, nth, nside, dout):
-    return _cutelib.cute_correlation_wrap(npos, npix, npix2, thmax, nth, nside, dout)
+def cute_correlation(nside, fld, msk, xmin, xmax, nx, do_log, hf_th, hm_th):
+    return _cutelib.cute_correlation(nside, fld, msk, xmin, xmax, nx, do_log, hf_th, hm_th)
 
-def cute_correlation_2D_wrap(npos, npix, npix2, thmax, nth, na, nside, dout):
-    return _cutelib.cute_correlation_2D_wrap(npos, npix, npix2, thmax, nth, na, nside, dout)
+def cute_scaled_correlation_wrap(npos, npix, npix2, thmax, nth, nside, dout):
+    return _cutelib.cute_scaled_correlation_wrap(npos, npix, npix2, thmax, nth, nside, dout)
+
+def cute_scaled_correlation_2D_wrap(npos, npix, npix2, thmax, nth, na, nside, dout):
+    return _cutelib.cute_scaled_correlation_2D_wrap(npos, npix, npix2, thmax, nth, na, nside, dout)
 
 def cute_line_correlation_wrap(npixs, npix2, thmax, nth, nside, per_bin, dout):
     return _cutelib.cute_line_correlation_wrap(npixs, npix2, thmax, nth, nside, per_bin, dout)
+
+def cute_correlation_wrap(npix, npix2, thmax, nth, nside, dout):
+    return _cutelib.cute_correlation_wrap(npix, npix2, thmax, nth, nside, dout)
 
 

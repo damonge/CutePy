@@ -2831,11 +2831,11 @@ SWIG_AsVal_int (PyObject * obj, int *val)
 }
 
 
-void cute_correlation_wrap(int npos, double *pos,
-			   int npix, double *fld,
-			   int npix2, double *msk,
-			   double thmax, int nth, int nside,
-			   double *dout, int ndout)
+void cute_scaled_correlation_wrap(int npos, double *pos,
+				  int npix, double *fld,
+				  int npix2, double *msk,
+				  double thmax, int nth, int nside,
+				  double *dout, int ndout)
 {
   int ngal=npos/4;
   double *hf_th = dout;
@@ -2846,12 +2846,12 @@ void cute_correlation_wrap(int npos, double *pos,
 			  hf_th, hm_th);
 }
 
-void cute_correlation_2D_wrap(int npos, double *pos,
-			      int npix, double *fld,
-			      int npix2, double *msk,
-			      double thmax, int nth, int na,
-			      int nside,
-			      double *dout, int ndout)
+void cute_scaled_correlation_2D_wrap(int npos, double *pos,
+				     int npix, double *fld,
+				     int npix2, double *msk,
+				     double thmax, int nth, int na,
+				     int nside,
+				     double *dout, int ndout)
 {
   int ngal=npos/4;
   double *hf_th = dout;
@@ -2883,6 +2883,19 @@ void cute_line_correlation_wrap(int npixs, double *flds,
 			0., thmax, nth, 0, hf_th,
 			hm_th, per_bin);
   free(fld);
+ }
+
+void cute_correlation_wrap(int npix, double *fld,
+			   int npix2, double *msk,
+			   double thmax, int nth, int nside,
+			   double *dout, int ndout)
+{
+  double *hf_th = dout;
+  double *hm_th = &(dout[nth]);
+
+  cute_correlation((long)nside, fld, msk,
+		   0., thmax, nth, 0,
+		   hf_th, hm_th);
  }
 
 
@@ -3661,7 +3674,92 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_cute_correlation_wrap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_cute_correlation(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  long arg1 ;
+  double *arg2 = (double *) 0 ;
+  double *arg3 = (double *) 0 ;
+  double arg4 ;
+  double arg5 ;
+  int arg6 ;
+  int arg7 ;
+  double *arg8 = (double *) 0 ;
+  double *arg9 = (double *) 0 ;
+  long val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  double val5 ;
+  int ecode5 = 0 ;
+  int val6 ;
+  int ecode6 = 0 ;
+  int val7 ;
+  int ecode7 = 0 ;
+  void *argp8 = 0 ;
+  int res8 = 0 ;
+  void *argp9 = 0 ;
+  int res9 = 0 ;
+  PyObject *swig_obj[9] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "cute_correlation", 9, 9, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_long(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "cute_correlation" "', argument " "1"" of type '" "long""'");
+  } 
+  arg1 = (long)(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "cute_correlation" "', argument " "2"" of type '" "double *""'"); 
+  }
+  arg2 = (double *)(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "cute_correlation" "', argument " "3"" of type '" "double *""'"); 
+  }
+  arg3 = (double *)(argp3);
+  ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "cute_correlation" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = (double)(val4);
+  ecode5 = SWIG_AsVal_double(swig_obj[4], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "cute_correlation" "', argument " "5"" of type '" "double""'");
+  } 
+  arg5 = (double)(val5);
+  ecode6 = SWIG_AsVal_int(swig_obj[5], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "cute_correlation" "', argument " "6"" of type '" "int""'");
+  } 
+  arg6 = (int)(val6);
+  ecode7 = SWIG_AsVal_int(swig_obj[6], &val7);
+  if (!SWIG_IsOK(ecode7)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "cute_correlation" "', argument " "7"" of type '" "int""'");
+  } 
+  arg7 = (int)(val7);
+  res8 = SWIG_ConvertPtr(swig_obj[7], &argp8,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res8)) {
+    SWIG_exception_fail(SWIG_ArgError(res8), "in method '" "cute_correlation" "', argument " "8"" of type '" "double *""'"); 
+  }
+  arg8 = (double *)(argp8);
+  res9 = SWIG_ConvertPtr(swig_obj[8], &argp9,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res9)) {
+    SWIG_exception_fail(SWIG_ArgError(res9), "in method '" "cute_correlation" "', argument " "9"" of type '" "double *""'"); 
+  }
+  arg9 = (double *)(argp9);
+  cute_correlation(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cute_scaled_correlation_wrap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   double *arg2 = (double *) 0 ;
@@ -3689,7 +3787,7 @@ SWIGINTERN PyObject *_wrap_cute_correlation_wrap(PyObject *SWIGUNUSEDPARM(self),
   PyObject *array10 = NULL ;
   PyObject *swig_obj[7] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "cute_correlation_wrap", 7, 7, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "cute_scaled_correlation_wrap", 7, 7, swig_obj)) SWIG_fail;
   {
     npy_intp size[1] = {
       -1
@@ -3728,17 +3826,17 @@ SWIGINTERN PyObject *_wrap_cute_correlation_wrap(PyObject *SWIGUNUSEDPARM(self),
   }
   ecode7 = SWIG_AsVal_double(swig_obj[3], &val7);
   if (!SWIG_IsOK(ecode7)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "cute_correlation_wrap" "', argument " "7"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "cute_scaled_correlation_wrap" "', argument " "7"" of type '" "double""'");
   } 
   arg7 = (double)(val7);
   ecode8 = SWIG_AsVal_int(swig_obj[4], &val8);
   if (!SWIG_IsOK(ecode8)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "cute_correlation_wrap" "', argument " "8"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "cute_scaled_correlation_wrap" "', argument " "8"" of type '" "int""'");
   } 
   arg8 = (int)(val8);
   ecode9 = SWIG_AsVal_int(swig_obj[5], &val9);
   if (!SWIG_IsOK(ecode9)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "cute_correlation_wrap" "', argument " "9"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "cute_scaled_correlation_wrap" "', argument " "9"" of type '" "int""'");
   } 
   arg9 = (int)(val9);
   {
@@ -3757,7 +3855,7 @@ SWIGINTERN PyObject *_wrap_cute_correlation_wrap(PyObject *SWIGUNUSEDPARM(self),
     if (!array10) SWIG_fail;
     arg10 = (double*) array_data(array10);
   }
-  cute_correlation_wrap(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
+  cute_scaled_correlation_wrap(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
   resultobj = SWIG_Py_Void();
   {
     resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array10);
@@ -3804,7 +3902,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_cute_correlation_2D_wrap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_cute_scaled_correlation_2D_wrap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   double *arg2 = (double *) 0 ;
@@ -3835,7 +3933,7 @@ SWIGINTERN PyObject *_wrap_cute_correlation_2D_wrap(PyObject *SWIGUNUSEDPARM(sel
   PyObject *array11 = NULL ;
   PyObject *swig_obj[8] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "cute_correlation_2D_wrap", 8, 8, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "cute_scaled_correlation_2D_wrap", 8, 8, swig_obj)) SWIG_fail;
   {
     npy_intp size[1] = {
       -1
@@ -3874,22 +3972,22 @@ SWIGINTERN PyObject *_wrap_cute_correlation_2D_wrap(PyObject *SWIGUNUSEDPARM(sel
   }
   ecode7 = SWIG_AsVal_double(swig_obj[3], &val7);
   if (!SWIG_IsOK(ecode7)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "cute_correlation_2D_wrap" "', argument " "7"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "cute_scaled_correlation_2D_wrap" "', argument " "7"" of type '" "double""'");
   } 
   arg7 = (double)(val7);
   ecode8 = SWIG_AsVal_int(swig_obj[4], &val8);
   if (!SWIG_IsOK(ecode8)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "cute_correlation_2D_wrap" "', argument " "8"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "cute_scaled_correlation_2D_wrap" "', argument " "8"" of type '" "int""'");
   } 
   arg8 = (int)(val8);
   ecode9 = SWIG_AsVal_int(swig_obj[5], &val9);
   if (!SWIG_IsOK(ecode9)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "cute_correlation_2D_wrap" "', argument " "9"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "cute_scaled_correlation_2D_wrap" "', argument " "9"" of type '" "int""'");
   } 
   arg9 = (int)(val9);
   ecode10 = SWIG_AsVal_int(swig_obj[6], &val10);
   if (!SWIG_IsOK(ecode10)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "cute_correlation_2D_wrap" "', argument " "10"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "cute_scaled_correlation_2D_wrap" "', argument " "10"" of type '" "int""'");
   } 
   arg10 = (int)(val10);
   {
@@ -3908,7 +4006,7 @@ SWIGINTERN PyObject *_wrap_cute_correlation_2D_wrap(PyObject *SWIGUNUSEDPARM(sel
     if (!array11) SWIG_fail;
     arg11 = (double*) array_data(array11);
   }
-  cute_correlation_2D_wrap(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12);
+  cute_scaled_correlation_2D_wrap(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12);
   resultobj = SWIG_Py_Void();
   {
     resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array11);
@@ -4078,14 +4176,131 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_cute_correlation_wrap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
+  double arg5 ;
+  int arg6 ;
+  int arg7 ;
+  double *arg8 = (double *) 0 ;
+  int arg9 ;
+  PyArrayObject *array1 = NULL ;
+  int is_new_object1 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  double val5 ;
+  int ecode5 = 0 ;
+  int val6 ;
+  int ecode6 = 0 ;
+  int val7 ;
+  int ecode7 = 0 ;
+  PyObject *array8 = NULL ;
+  PyObject *swig_obj[6] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "cute_correlation_wrap", 6, 6, swig_obj)) SWIG_fail;
+  {
+    npy_intp size[1] = {
+      -1
+    };
+    array1 = obj_to_array_contiguous_allow_conversion(swig_obj[0],
+      NPY_DOUBLE,
+      &is_new_object1);
+    if (!array1 || !require_dimensions(array1, 1) ||
+      !require_size(array1, size, 1)) SWIG_fail;
+    arg1 = (int) array_size(array1,0);
+    arg2 = (double*) array_data(array1);
+  }
+  {
+    npy_intp size[1] = {
+      -1
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[1],
+      NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (int) array_size(array3,0);
+    arg4 = (double*) array_data(array3);
+  }
+  ecode5 = SWIG_AsVal_double(swig_obj[2], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "cute_correlation_wrap" "', argument " "5"" of type '" "double""'");
+  } 
+  arg5 = (double)(val5);
+  ecode6 = SWIG_AsVal_int(swig_obj[3], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "cute_correlation_wrap" "', argument " "6"" of type '" "int""'");
+  } 
+  arg6 = (int)(val6);
+  ecode7 = SWIG_AsVal_int(swig_obj[4], &val7);
+  if (!SWIG_IsOK(ecode7)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "cute_correlation_wrap" "', argument " "7"" of type '" "int""'");
+  } 
+  arg7 = (int)(val7);
+  {
+    npy_intp dims[1];
+    if (!PyInt_Check(swig_obj[5]))
+    {
+      const char* typestring = pytype_string(swig_obj[5]);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg9 = (int) PyInt_AsLong(swig_obj[5]);
+    dims[0] = (npy_intp) arg9;
+    array8 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array8) SWIG_fail;
+    arg8 = (double*) array_data(array8);
+  }
+  cute_correlation_wrap(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+  resultobj = SWIG_Py_Void();
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array8);
+  }
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
 static PyMethodDef SwigMethods[] = {
 	 { "SWIG_PyInstanceMethod_New", SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { "cute_correlation_scaled", _wrap_cute_correlation_scaled, METH_VARARGS, NULL},
 	 { "cute_correlation_scaled_2D", _wrap_cute_correlation_scaled_2D, METH_VARARGS, NULL},
 	 { "cute_line_correlation", _wrap_cute_line_correlation, METH_VARARGS, NULL},
-	 { "cute_correlation_wrap", _wrap_cute_correlation_wrap, METH_VARARGS, NULL},
-	 { "cute_correlation_2D_wrap", _wrap_cute_correlation_2D_wrap, METH_VARARGS, NULL},
+	 { "cute_correlation", _wrap_cute_correlation, METH_VARARGS, NULL},
+	 { "cute_scaled_correlation_wrap", _wrap_cute_scaled_correlation_wrap, METH_VARARGS, NULL},
+	 { "cute_scaled_correlation_2D_wrap", _wrap_cute_scaled_correlation_2D_wrap, METH_VARARGS, NULL},
 	 { "cute_line_correlation_wrap", _wrap_cute_line_correlation_wrap, METH_VARARGS, NULL},
+	 { "cute_correlation_wrap", _wrap_cute_correlation_wrap, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 

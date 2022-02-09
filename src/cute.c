@@ -380,7 +380,7 @@ void cute_correlation_scaled(long ngal,double *pos,long nside,double *fld,double
     double *hm_th_thr=my_calloc(nx,sizeof(double));
     int lenlist0=2*npix;
     int *listpix=my_malloc(lenlist0*sizeof(int));
-    
+
     int logbin=do_log;
     double log_x_max=log10(xmax);
     double i_x_max=1./xmax;
@@ -430,7 +430,7 @@ void cute_correlation_scaled(long ngal,double *pos,long nside,double *fld,double
 	hm_th[i]+=hm_th_thr[i];
       }
     } //end omp critical
-      
+
     free(hf_th_thr);
     free(hm_th_thr);
     free(listpix);
@@ -474,7 +474,7 @@ void cute_correlation_scaled_2D(long ngal,double *pos,long nside,double *fld,dou
     double *hm_th_thr=my_calloc(nx*na,sizeof(double));
     int lenlist0=npix/2;
     int *listpix=my_malloc(lenlist0*sizeof(int));
-    
+
     int logbin=do_log;
     double log_x_max=log10(xmax);
     double i_x_max=1./xmax;
@@ -546,7 +546,7 @@ void cute_correlation_scaled_2D(long ngal,double *pos,long nside,double *fld,dou
 	hm_th[i]+=hm_th_thr[i];
       }
     } //end omp critical
-      
+
     free(hf_th_thr);
     free(hm_th_thr);
     free(listpix);
@@ -596,7 +596,7 @@ void cute_line_correlation(long nside, double **fld, double *msk,
     double *hm_th_thr=my_calloc(nx,sizeof(double));
     int lenlist0=2*npix;
     int *listpix=my_malloc(lenlist0*sizeof(int));
-    
+
     int logbin=do_log;
     double log_x_max=log10(xmax);
     double i_x_max=1./xmax;
@@ -648,7 +648,99 @@ void cute_line_correlation(long nside, double **fld, double *msk,
 	hm_th[i1]+=hm_th_thr[i1];
       }
     } //end omp critical
-      
+
+    free(hf_th_thr);
+    free(hm_th_thr);
+    free(listpix);
+  } //end omp parallel
+
+  free(pos_pix);
+  free(cth_pix);
+  free(phi_pix);
+}
+
+void cute_correlation(long nside, double *fld, double *msk,
+		      double xmin, double xmax, int nx, int do_log,
+		      double *hf_th, double *hm_th)
+{
+  long npix=he_nside2npix(nside);
+  double *pos_pix=my_malloc(3*npix*sizeof(double));
+  double *cth_pix=my_malloc(npix*sizeof(double));
+  double *phi_pix=my_malloc(npix*sizeof(double));
+
+  //Calculate coordinates of all pixels in map
+#pragma omp parallel default(none)		\
+  shared(pos_pix,cth_pix,phi_pix,npix,nside)
+  {
+    long ip;
+
+#pragma omp for
+    for(ip=0;ip<npix;ip++) {
+      double *v=&(pos_pix[3*ip]);
+      he_pix2vec_ring(nside,ip,v);
+      cth_pix[ip]=v[2];
+      phi_pix[ip]=atan2(v[1],v[0]);
+    } //end omp for
+  } //end omp parallel
+
+  //Zero all histograms
+  int ih;
+  for(ih=0;ih<nx;ih++) {
+    hf_th[ih]=0;
+    hm_th[ih]=0;
+  }
+
+  //Parallel region
+#pragma omp parallel default(none)			\
+  shared(fld,msk,nside,npix,xmin,xmax,nx,do_log)	\
+  shared(hf_th,hm_th,pos_pix,cth_pix,phi_pix)
+  {
+    int i1;
+    double *hf_th_thr=my_calloc(nx,sizeof(double));
+    double *hm_th_thr=my_calloc(nx,sizeof(double));
+    int lenlist0=2*npix;
+    int *listpix=my_malloc(lenlist0*sizeof(int));
+
+    int logbin=do_log;
+    double log_x_max=log10(xmax);
+    double i_x_max=1./xmax;
+    double n_logint=-1;
+    if(do_log)
+      n_logint=nx/log10(xmax/xmin);
+
+#pragma omp for schedule(dynamic)
+    for(i1=0;i1<npix;i1++) {
+      if(msk[i1]<=0)
+	continue;
+      int j, lenlist_half=lenlist0/2;
+      double *pos1=&(pos_pix[3*i1]);
+      he_query_disc(nside,cth_pix[i1],phi_pix[i1],1.2*xmax,listpix,&lenlist_half,1);
+      for(j=0;j<lenlist_half;j++) {
+	int ax,ix,i2=listpix[j];
+	double *pos2=&(pos_pix[3*i2]);
+	double prod=0;
+	if(i2<=i1)
+	  continue;
+	if(msk[i2]<=0)
+	  continue;
+	for(ax=0;ax<3;ax++)
+	  prod+=pos1[ax]*pos2[ax];
+	ix=th2bin_scaled(prod,1.0,logbin,n_logint,log_x_max,nx,i_x_max);
+	if((ix<nx) && (ix>=0)) {
+	  hf_th_thr[ix]+=fld[i1]*fld[i2];
+	  hm_th_thr[ix]+=msk[i1]*msk[i2];
+	}
+      }
+    } //end omp for
+
+#pragma omp critical
+    {
+      for(i1=0;i1<nx;i1++) {
+	hf_th[i1]+=hf_th_thr[i1];
+	hm_th[i1]+=hm_th_thr[i1];
+      }
+    } //end omp critical
+
     free(hf_th_thr);
     free(hm_th_thr);
     free(listpix);
